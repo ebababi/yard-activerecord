@@ -6,6 +6,10 @@ module YARD::Handlers::Ruby::ActiveRecord::Associations
     namespace_only
 
     def process
+      return unless \
+        namespace.inheritance_tree.include?(P('ApplicationRecord')) ||
+        namespace.inheritance_tree.include?(P('ActiveRecord::Base'))
+
       namespace.groups << group_name unless namespace.groups.include? group_name
 
       object           = register YARD::CodeObjects::MethodObject.new(namespace, method_name)

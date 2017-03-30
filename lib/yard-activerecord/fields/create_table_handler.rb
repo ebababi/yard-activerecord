@@ -7,10 +7,15 @@ module YARD::Handlers::Ruby::ActiveRecord::Fields
 
     def process
       return unless globals.ar_schema
-      globals.klass = ActiveSupport::Inflector.singularize call_params.first.camelize
-      if P(globals.klass).class == YARD::CodeObjects::Proxy
-        # Try module with the first part
-        globals.klass = globals.klass.underscore.split('_',2).map(&:camelize).join('::')
+      table_name = call_params.first
+      class_name_regex = table_name.
+        singularize.
+        split('_').
+        map(&:camelize).
+        join('(::|_)?')
+      regex = Regexp.new("#{class_name_regex}$")
+      globals.klass = YARD::Registry.all(:class).find do |co|
+        regex.match(co.path)
       end
       parse_block(statement.last.last)
       globals.klass = nil
